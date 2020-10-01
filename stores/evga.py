@@ -89,25 +89,26 @@ class Evga:
                 self.driver.add_cookie(cookie)
 
         self.driver.get("https://store.asus.com/us")
-        WebDriverWait(self.driver, 30).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, '/html/body/div/header/div[1]/nav[2]/ul/li[3]/div')
-            )
-        ).click()
+#        WebDriverWait(self.driver, 30).until(
+#            EC.element_to_be_clickable(
+#                (By.XPATH, '/html/body/div/header/div[1]/nav[2]/ul/li[3]/div')
+#            )
+#        ).click()
         if (
             len(self.driver.find_elements_by_id("login_link")) > 0
         ):  # cookies did not provide logged in state
             self.driver.get(LOGIN_URL)
-            selenium_utils.wait_for_page(self.driver, "Asus Account")
+            selenium_utils.wait_for_either_title(self.driver, "Asus Account", "My Profile")
 
-            selenium_utils.field_send_keys(self.driver, '//*[@id="Front_txtAccountID"]', username)
-            selenium_utils.field_send_keys(self.driver, '//*[@id="Front_txtPassword"]', password)
+            if self.driver.title == "Asus Account":
+                selenium_utils.field_send_keys(self.driver, '//*[@id="Front_txtAccountID"]', username)
+                selenium_utils.field_send_keys(self.driver, '//*[@id="Front_txtPassword"]', password)
 
-            log.info("Go do the captcha and log in")
+                log.info("Go do the captcha and log in")
 
-            selenium_utils.wait_for_page(
-                self.driver, "My Profile", 300
-            )
+                selenium_utils.wait_for_page(
+                    self.driver, "My Profile", 300
+                )
             pickle.dump(
                 self.driver.get_cookies(), open("asus-cookies.pkl", "wb")
             )  # save cookies
@@ -163,17 +164,21 @@ class Evga:
                     first = False
 #             wait_until_loaded(self.driver)
                 sleep(10)
-                atc_buttons = self.driver.find_element_by_xpath(
-                    '//*[@id="item_add_cart"]'
-                )
+                try:
+                    atc_buttons = self.driver.find_element_by_xpath(
+                        '//*[@id="item_add_cart"]'
+                    )
+                except:
+                    continue
 
-            try:
-                log.info("click add to cart")
-                #  Add to cart
-                atc_buttons.click()
-                break
-            except:
-                continue
+            if atc_buttons:
+                try:
+                    log.info("click add to cart")
+                    #  Add to cart
+                    atc_buttons.click()
+                    break
+                except:
+                    continue
 
         log.info("send notification")
         # Send notification that product is available
