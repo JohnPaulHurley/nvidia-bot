@@ -150,6 +150,7 @@ class Evga:
 #
 #            card_btn[0].click()
         self.driver.get("https://store.asus.com/us/item/202009AM290000002/ASUS-ROG-STRIX-NVIDIA-GeForce-RTX-3080-OC-Edition-Gaming-Graphics-Card-%28PCIe-4.0%2C-10GB-GDDR6X%2C-HDMI-2.1%2C-DisplayPort-1.4a%2C-Axial-tech-Fan-Design%2C-2.9-slot%2C-Super-Alloy-Power-II%2C-GPU-Tweak-II%29")
+#        self.driver.get("https://store.asus.com/us/item/201906AM120000005")
         #  Check for stock
         log.info("On GPU Page")
         first = True
@@ -157,13 +158,13 @@ class Evga:
             atc_buttons = False
             while not atc_buttons:
                 if not first:
-                    sleep(15)
+                    sleep(25)
                     log.debug("Refreshing page for GPU")
                     self.driver.refresh()
                 else:
                     first = False
 #             wait_until_loaded(self.driver)
-                sleep(10)
+#                sleep(10)
                 try:
                     atc_buttons = self.driver.find_element_by_xpath(
                         '//*[@id="item_add_cart"]'
@@ -185,10 +186,15 @@ class Evga:
         self.notification_handler.send_notification(
             f"📦 Card found in stock at ASUS"
         )
-
+        sleep(2)
         log.info("waiting for checkout page")
+#        WebDriverWait(self.driver, 100).until(
+#            EC.element_to_be_clickable(
+#                (By.XPATH, '//*[@id="mycart"]/div/a')
+#            )
+#        ).click()
         #  Go to checkout
-        selenium_utils.wait_for_page(self.driver, "Welcome to ASUS Online Store - ASUS Store", 300)
+#        selenium_utils.wait_for_page(self.driver, "Welcome to ASUS Online Store - ASUS Store", 300)
 #        selenium_utils.button_click_using_xpath(
 #            self.driver, '//*[@id="LFrame_CheckoutButton"]'
 #        )
@@ -196,54 +202,68 @@ class Evga:
 #        # Shipping Address screen
 #        selenium_utils.wait_for_page(self.driver, "Shopping")
 
-        log.info("Skip that page.")
-        self.driver.get("https://shop-us1.asus.com/AW000706/checkout")
+#        log.info("Skip that page.")
+        self.driver.get("https://shop-us1.asus.com/AW000706/cart")
 
-        selenium_utils.wait_for_page(self.driver, "Checkout - ASUS Store")
+        selenium_utils.wait_for_page(self.driver, "Welcome to ASUS Online Store - ASUS Store")
+        selenium_utils.button_click_using_xpath(
+            self.driver, '//*[@id="app"]/div[2]/main/div/div/div[3]/div/aside/div/div[3]/button'
+        )
 
         log.info("Ensure that we are paying with credit card")
+        selenium_utils.wait_for_page(self.driver, "Checkout - ASUS Store")
 #        sleep(3)
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="checkout-step__shipping-and-billing"]/div[4]/div/a'))
-        ).click()
-        WebDriverWait(self.driver, 10).until(
+        try:
+            WebDriverWait(self.driver, 100).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div/div[2]/main/div/div/div[3]/div/div/form/section[1]/div[4]/div/a'))
+            ).click()
+        except:
+            pass
+        WebDriverWait(self.driver, 100).until(
             EC.element_to_be_clickable(
                 (By.XPATH, '//*[@id="form-shipping-method"]/div/div/div[3]/div/label')
             )
         ).click()
-        WebDriverWait(self.driver, 10).until(
+        WebDriverWait(self.driver, 100).until(
             EC.element_to_be_clickable(
                 (By.XPATH, '//*[@id="checkout-step__shipping-method"]/div[2]/div/a')
             )
         ).click()
-        WebDriverWait(self.driver, 10).until(
+        WebDriverWait(self.driver, 100).until(
             EC.element_to_be_clickable(
                 (By.XPATH, '//*[@id="form-customer-info"]/div/div/div[1]/div/div/label')
             )
         ).click()
-        WebDriverWait(self.driver, 10).until(
+        WebDriverWait(self.driver, 100).until(
             EC.element_to_be_clickable(
                 (By.XPATH, '//*[@id="continueBtn"]')
             )
         ).click()
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, '//*[@id="checkout-step__review"]/div[2]/div[4]/div[2]/div/div[1]/label')
-            )
-        ).click()
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, '//*[@id="checkout-step__review"]/div[2]/div[4]/div[2]/div/div[2]/label')
-            )
-        ).click()
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, '//*[@id="checkout-step__review"]/div[2]/div[4]/div[3]/a')
-            )
-        ).click()
+        try:
+            WebDriverWait(self.driver, 100).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, '//*[@id="checkout-step__review"]/div[2]/div[4]/div[2]/div/div[2]/label')
+                )
+            ).click()
+        except:
+            pass
+        try:
+            WebDriverWait(self.driver, 100).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, '//*[@id="checkout-step__review"]/div[2]/div[4]/div[2]/div/div[1]/label')
+                )
+            ).click()
+            WebDriverWait(self.driver, 100).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, '//*[@id="checkout-step__review"]/div[2]/div[4]/div[3]/a')
+                )
+            ).click()
+        except:
+            pass
+
 
         selenium_utils.wait_for_page(self.driver, "Payment Acceptance", 300)
-        WebDriverWait(self.driver, 10).until(
+        WebDriverWait(self.driver, 100).until(
             EC.element_to_be_clickable(
                 (By.XPATH, '//*[@id="card_type_001"]')
             )
@@ -269,7 +289,7 @@ class Evga:
 
 
         try:
-            WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, 100).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="payment_details_lower"]/input[2]')
                 )
@@ -280,12 +300,12 @@ class Evga:
         log.info("Finalize Order Page")
 #        selenium_utils.wait_for_page(self.driver, "EVGA - Checkout - Finalize Order")
 #
-#        WebDriverWait(self.driver, 10).until(
+#        WebDriverWait(self.driver, 100).until(
 #            EC.element_to_be_clickable((By.ID, "ctl00_LFrame_cbAgree"))
 #        ).click()
 #
 #        if not test:
-#            WebDriverWait(self.driver, 10).until(
+#            WebDriverWait(self.driver, 100).until(
 #                EC.element_to_be_clickable((By.ID, "ctl00_LFrame_btncontinue"))
 #            ).click()
 
